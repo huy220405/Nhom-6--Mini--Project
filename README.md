@@ -1,159 +1,88 @@
-# Shopping Cart Analysis
+# 🛒 PHÂN KHÚC KHÁCH HÀNG DỰA TRÊN LUẬT KẾT HỢP (RULE-BASED CLUSTERING)
 
-Phân tích dữ liệu bán lẻ để tìm ra mối quan hệ giữa các sản phẩm thường được mua cùng nhau bằng các kỹ thuật **Association Rule Mining** (Apriori). Project triển khai pipeline đầy đủ từ xử lý dữ liệu → phân tích → khai thác luật → sinh báo cáo.
-
----
-
-## Features
-
-- Làm sạch dữ liệu & xử lý giá trị lỗi
-- Xây dựng basket matrix (transaction × product)
-- Khai phá tập mục phổ biến (Frequent itemsets)
-- Sinh luật kết hợp (Association Rules)
-- Các chỉ số:
-  - Support
-  - Confidence
-  - Lift
-- Visualization với:
-  - bar chart
-  - scatter plot
-  - network graph
-  - interactive Plotly
-- Tự động hóa pipeline bằng **Papermill**
+## 👥 Thông tin Nhóm
+- **Nhóm:** 6
+- **Môn học:** Data Mining (Khai phá dữ liệu)
+- **Thành viên:**
+  - Ngô Hoàng Huy
+  - Mai Văn Tiến
+  - Nguyễn Trí Dũng
+  - Chu Ngọc Hân
 
 ---
 
-## Project Structure
+## 1. Giới thiệu bài toán và Mục tiêu nhóm
 
-```text
-shopping_cart_analysis/
-├── data/
-│   ├── raw/
-│   │   └── online_retail.csv
-│   └── processed/
-│       ├── cleaned_uk_data.csv
-│       ├── basket_bool.parquet
-│       └── rules_apriori_filtered.csv
-│
-├── notebooks/
-│   ├── preprocessing_and_eda.ipynb
-│   ├── basket_preparation.ipynb
-│   ├── apriori_modelling.ipynb
-│   └── runs/
-│       ├── preprocessing_and_eda_run.ipynb
-│       ├── basket_preparation_run.ipynb
-│       └── apriori_modelling_run.ipynb
-│
-├── src/
-│   └── shopping_cart_library.py
-│
-├── run_papermill.py
-├── requirements.txt
-└── README.md
-```
+### 📌 Bài toán đặt ra
+Các phương pháp phân cụm truyền thống (như RFM) chỉ cho biết khách hàng "chi nhiều hay ít", nhưng **không cho biết họ mua những gì**. Điều này khiến doanh nghiệp gặp khó khăn khi muốn thiết kế các gói combo sản phẩm cụ thể.
+
+### 🎯 Mục tiêu của nhóm
+Xây dựng một mô hình phân khúc khách hàng mới, kết hợp giữa:
+1.  **Khai phá luật kết hợp (Association Rules):** Tìm ra các thói quen mua sắm đi kèm nhau (Ví dụ: Mua A thường mua B).
+2.  **Phân cụm (Clustering):** Gom nhóm những khách hàng có cùng thói quen mua các combo đó.
+
+=> **Kết quả:** Định danh chính xác chân dung khách hàng để đề xuất chiến lược Marketing cá nhân hóa.
 
 ---
 
-## Installation
+## 2. Kết quả trọng tâm
 
-```bash
-git clone <your_repo_url>
-cd shopping_cart_analysis
-pip install -r requirements.txt
-Data Preparation
-Đặt file gốc vào:
-```
+Dựa trên thuật toán **FP-Growth** và **K-Means**, hệ thống đã phân loại khách hàng thành **3 nhóm** với đặc điểm hành vi khác biệt:
 
-```bash
-data/raw/online_retail.csv
-File output sẽ được sinh tự động vào:
-```
+| Nhóm (Cluster) | Số lượng | Đặc điểm hành vi nổi bật |
+| :--- | :--- | :--- |
+| **Cluster 1** | **125 khách** | **Nhóm "Tín đồ Combo":** Đây là nhóm khách hàng tuân thủ tuyệt đối các luật mua sắm. Họ mua trọn bộ sưu tập *Herb Marker* (Parsley, Thyme, Basil...). |
+| **Cluster 2** | **10 khách** | **Nhóm "Khách hàng Ngách":** Nhóm rất nhỏ nhưng mua sắm tập trung vào các sản phẩm đặc thù (Rosemary, Mint) với tần suất lặp lại cao. |
+| **Cluster 0** | **4204 khách** | **Nhóm "Khách đại trà":** Chiếm đa số (96%). Mua sắm ngẫu nhiên, rời rạc và không theo quy luật combo cố định nào. |
 
-```bash
-data/processed/
-```
+---
 
-Run Pipeline (Recommended)
-Chạy toàn bộ phân tích chỉ với 1 lệnh:
+## 3. Diễn giải các biểu đồ kỹ thuật
 
-```bash
-python run_papermill.py
-```
-Kết quả sinh ra:
+Dưới đây là các phân tích kỹ thuật chứng minh độ hiệu quả của mô hình nhóm đã xây dựng:
 
-```bash
-data/processed/cleaned_uk_data.csv
-data/processed/basket_bool.parquet
-data/processed/rules_apriori_filtered.csv
-notebooks/runs/apriori_modelling_run.ipynb
-```
+### 📊 Biểu đồ 1: Xác định số cụm tối ưu (Elbow & Silhouette)
+*(Phương pháp giúp nhóm quyết định chọn K=3)*
+![Elbow Method](images/elbow_method.png)
+> **Phân tích:**
+> - Đường màu xanh (Inertia) tạo thành "khuỷu tay" rõ rệt tại **K=3**.
+> - Đường màu cam (Silhouette Score) đạt đỉnh cao nhất (~0.99) tại K=3.
+> -> **Kết luận:** Chia khách hàng thành 3 nhóm là tối ưu nhất.
 
-### Changing Parameters
-Các tham số có thể chỉnh trong run_papermill.py:
+### 🧩 Biểu đồ 2: Trực quan hóa không gian cụm (PCA)
+*(Hình ảnh các điểm dữ liệu sau khi phân nhóm)*
+![PCA Clustering](images/pca_plot.png)
+> **Phân tích:**
+> - Các điểm dữ liệu (đại diện cho khách hàng) được tách thành các đám màu riêng biệt trên không gian 2 chiều.
+> - **Cluster 1 (Xanh)** và **Cluster 2 (Vàng)** tách biệt hoàn toàn so với phần còn lại, chứng tỏ đặc điểm mua sắm của họ rất đặc trưng và khác biệt.
 
-```python
-MIN_SUPPORT=0.01
-MAX_LEN=3
-FILTER_MIN_CONF=0.3
-FILTER_MIN_LIFT=1.2
-```
+### ⚖️ Biểu đồ 3: So sánh hiệu quả mô hình (Binary vs Weighted)
+*(So sánh 2 phương pháp tạo đặc trưng: Nhị phân và Trọng số)*
+![Model Comparison](images/model_comparison.png)
+> **Phân tích:**
+> - Cả hai phương pháp đều cho kết quả Silhouette Score rất cao (> 0.98).
+> - Phương pháp **Weighted (Trọng số Lift)** cho kết quả tương đương với Binary, chứng tỏ mô hình hoạt động ổn định dù có tính thêm trọng số độ mạnh của luật hay không.
 
-Hoặc sửa trong cell PARAMETERS của mỗi notebook để chạy với cấu hình khác nhau.
+---
 
-### Visualization & Results
-Notebook 03 hiển thị các biểu đồ sau:
+## 4. Kết luận và Đề xuất hành động
 
-Top luật theo Lift
+Dựa trên chân dung khách hàng đã định danh, nhóm đề xuất chiến lược:
 
-Top luật theo Confidence
+### ✅ Đối với Cluster 1 (125 khách - Tín đồ Combo)
+* **Chiến lược:** Bán theo gói (Bundling).
+* **Hành động:** Tạo gói sản phẩm **"Herb Collection"** (Gồm Parsley + Thyme + Basil).
+* **Ưu đãi:** Giảm 10-15% khi mua trọn bộ thay vì mua lẻ.
 
-Scatter Support–Confidence–Lift
+### ✅ Đối với Cluster 2 (10 khách - Khách hàng Ngách)
+* **Chiến lược:** Chăm sóc cá nhân hóa (Personalization).
+* **Hành động:** Gửi thông báo riêng (SMS/Email) khi có các dòng sản phẩm thảo mộc mới hoặc hàng hiếm về kho.
 
-Network Graph giữa các sản phẩm
+### ✅ Đối với Cluster 0 (4204 khách - Đại trà)
+* **Chiến lược:** Kích cầu diện rộng.
+* **Hành động:** Gửi mã Freeship hoặc Voucher giảm giá theo giá trị đơn hàng để khuyến khích họ quay lại và mua nhiều hơn.
 
-Biểu đồ Plotly tương tác
-
-Bạn có thể export sang HTML:
-
-```bash
-jupyter nbconvert notebooks/runs/priori_modelling_run.ipynb --to html
-```
-
-### Ứng dụng thực tế
-Product recommendation
-
-Cross-selling strategy
-
-Combo gợi ý sản phẩm
-
-Phân tích hành vi mua hàng
-
-Sắp xếp sản phẩm tại siêu thị
-
-### Tech Stack
-
-| Công nghệ | Mục đích |
-|----------|----------|
-| Python | Ngôn ngữ chính |
-| Pandas | Xử lý dữ liệu transaction |
-| MLxtend | Apriori / FP-Growth association rules |
-| Papermill | Chạy pipeline notebook tự động |
-| Matplotlib & Seaborn | Visualization biểu đồ tĩnh |
-| Plotly | Dashboard / biểu đồ tương tác |
-| Jupyter Notebook | Môi trường notebook |
-
-### Roadmap
- Thêm FP-Growth notebook (04)
-
- Streamlit dashboard để lọc luật
-
-
-### Author
-Project thực hiện bởi:
-Trang Le
-
-📄 License
-MIT — sử dụng tự do cho nghiên cứu, học thuật và ứng dụng nội bộ.
-
-
-17.10
+---
+### ⚙️ Cách chạy dự án
+1. Cài đặt thư viện: `pip install -r requirements.txt`
+2. Chạy Dashboard: `streamlit run src/app.py`
