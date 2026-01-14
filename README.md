@@ -1,4 +1,4 @@
-# 🛒 PHÂN KHÚC KHÁCH HÀNG DỰA TRÊN LUẬT KẾT HỢP (RULE-BASED CLUSTERING)
+# 🛒 PHÂN CỤM KHÁCH HÀNG DỰA TRÊN LUẬT KẾT HỢP (RULE-BASED CLUSTERING)
 
 ## 👥 Thông tin Nhóm
 - **Nhóm:** 6
